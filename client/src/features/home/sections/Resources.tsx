@@ -34,6 +34,7 @@ export default function Resources() {
                 icon={<Database className="h-4 w-4" />}
                 title="Kaggle Dataset"
                 sub="curated Taglish image-text pairs"
+                href="https://www.kaggle.com/datasets/marcusaustria/kitako-multimodal-dataset"
               />
               <ResourceLink
                 icon={<FileText className="h-4 w-4" />}
