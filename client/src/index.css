@@ -128,7 +128,7 @@
     scroll-behavior: smooth;
   }
   section[id] {
-    scroll-margin-top: 6rem;
+    scroll-margin-top: 0;
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;

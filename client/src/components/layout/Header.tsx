@@ -1,15 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 
-/**
- * Floating pill-style top navigation. Centered, never spans full width.
- * Becomes more compact and slightly tinted after scroll.
- */
+const NAV_ITEMS = [
+  { label: 'About', id: 'about' },
+  { label: 'Research', id: 'research' },
+  { label: 'Team', id: 'team' },
+  { label: 'Resources', id: 'resources' },
+] as const;
+
+const NAV_HEIGHT = 88; // px — approximate fixed header clearance
+const SCROLL_OFFSET = 24; // extra gap below nav
+
+function scrollToSection(id: string) {
+  const section = document.getElementById(id);
+  if (!section) return;
+  const eyebrow = section.querySelector<HTMLElement>('.eyebrow');
+  const target = eyebrow ?? section;
+  const top = target.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT - SCROLL_OFFSET;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+}
+
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
+  const navListRef = useRef<HTMLUListElement>(null);
+  const itemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+
+  // Scroll state for nav shrink
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
@@ -17,12 +38,39 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const navItems = [
-    { label: 'About', href: '#about' },
-    { label: 'Research', href: '#research' },
-    { label: 'Team', href: '#team' },
-    { label: 'Resources', href: '#resources' },
-  ];
+  // Active section via scroll position
+  useEffect(() => {
+    function update() {
+      const scrollY = window.scrollY + NAV_HEIGHT + SCROLL_OFFSET + 8;
+      let current: string | null = null;
+      for (const { id } of NAV_ITEMS) {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= scrollY) current = id;
+      }
+      setActiveSection(current);
+    }
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, []);
+
+  // Slide the pill to the active nav item
+  useEffect(() => {
+    const list = navListRef.current;
+    if (!activeSection || !list) {
+      setPillStyle((p) => ({ ...p, opacity: 0 }));
+      return;
+    }
+    const anchor = itemRefs.current.get(activeSection);
+    if (!anchor) return;
+    const listRect = list.getBoundingClientRect();
+    const anchorRect = anchor.getBoundingClientRect();
+    setPillStyle({
+      left: anchorRect.left - listRect.left,
+      width: anchorRect.width,
+      opacity: 1,
+    });
+  }, [activeSection, scrolled]);
 
   return (
     <>
@@ -65,13 +113,39 @@ export default function Header() {
 
           <span className="hidden md:block h-5 w-px bg-white/15 mx-1" />
 
-          {/* Desktop nav — plain anchors for in-page hash navigation */}
-          <ul className="hidden md:flex items-center">
-            {navItems.map((item) => (
-              <li key={item.href}>
+          {/* Desktop nav */}
+          <ul ref={navListRef} className="hidden md:flex items-center relative">
+            {/* Sliding active pill */}
+            <span
+              aria-hidden
+              className="absolute inset-y-1 rounded-full bg-white/15 pointer-events-none"
+              style={{
+                left: pillStyle.left,
+                width: pillStyle.width,
+                opacity: pillStyle.opacity,
+                transition: 'left 300ms cubic-bezier(0.4,0,0.2,1), width 300ms cubic-bezier(0.4,0,0.2,1), opacity 200ms ease',
+              }}
+            />
+
+            {NAV_ITEMS.map((item) => (
+              <li key={item.id}>
                 <a
-                  href={item.href}
-                  className="inline-flex items-center px-3.5 py-1.5 text-[13px] font-medium text-white/80 transition-colors duration-300 hover:text-white"
+                  ref={(el) => {
+                    if (el) itemRefs.current.set(item.id, el);
+                    else itemRefs.current.delete(item.id);
+                  }}
+                  href={`#${item.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection(item.id);
+                  }}
+                  className={[
+                    'relative inline-flex items-center px-3.5 py-1.5 text-[13px] font-medium',
+                    'transition-colors duration-300',
+                    activeSection === item.id
+                      ? 'text-white'
+                      : 'text-white/70 hover:text-white',
+                  ].join(' ')}
                 >
                   {item.label}
                 </a>
@@ -82,6 +156,10 @@ export default function Header() {
           {/* CTA */}
           <a
             href="#resources"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToSection('resources');
+            }}
             className="hidden md:inline-flex items-center gap-1.5 ml-1 rounded-full bg-[#2c8fd5] px-4 py-2 text-[13px] font-semibold text-white shadow-sm transition-all duration-300 hover:bg-white hover:text-[#16224a] hover:shadow-md"
           >
             Read thesis
@@ -111,22 +189,38 @@ export default function Header() {
       >
         <div className="mx-4 mt-20 rounded-3xl border border-white/10 bg-[#16224a] p-6 shadow-2xl">
           <ul className="flex flex-col divide-y divide-white/10">
-            {navItems.map((item) => (
-              <li key={item.href}>
+            {NAV_ITEMS.map((item) => (
+              <li key={item.id}>
                 <a
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between py-4 text-white/90"
+                  href={`#${item.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    setTimeout(() => scrollToSection(item.id), 300);
+                  }}
+                  className={[
+                    'flex items-center justify-between py-4',
+                    activeSection === item.id ? 'text-white' : 'text-white/90',
+                  ].join(' ')}
                 >
                   <span className="font-display text-2xl">{item.label}</span>
-                  <ArrowUpRight className="h-4 w-4 text-white/50" />
+                  <span className="flex items-center gap-2">
+                    {activeSection === item.id && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#2c8fd5]" />
+                    )}
+                    <ArrowUpRight className="h-4 w-4 text-white/50" />
+                  </span>
                 </a>
               </li>
             ))}
           </ul>
           <a
             href="#resources"
-            onClick={() => setOpen(false)}
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(false);
+              setTimeout(() => scrollToSection('resources'), 300);
+            }}
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#2c8fd5] px-5 py-3 text-sm font-semibold text-white"
           >
             Read thesis
