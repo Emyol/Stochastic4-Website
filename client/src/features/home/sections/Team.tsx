@@ -1,15 +1,15 @@
 const MENTOR = {
   name: 'Justine Jude C. Pura, MBA',
   role: 'Thesis Adviser',
-  photo: '/Pura, Justine Jude.jpeg',
+  photo: '/justine_pura.png',
   bio: 'Placeholder bio for the thesis mentor. This section will contain information about their background, expertise, and role in guiding the KitaKo project.',
 };
 
 const MEMBERS = [
-  { name: 'Acuña, Amiel Josiah C.', role: 'Researcher', tag: 'AC', photo: '/ACUÑA_AMIEL JOSIAH.JPG' },
-  { name: 'Austria, Marcus Ceasar Q.', role: 'Researcher', tag: 'MA', photo: '/AUSTRIA_MARCUS.jpeg' },
-  { name: 'Barrios, Ric Ian I.', role: 'Researcher', tag: 'RB', photo: '/BARRIOS_RICIAN_1x1Photo.png' },
-  { name: 'Tolentino, Jhezra A.', role: 'Researcher', tag: 'JT', photo: '/TOLENTINO_JHEZRA.png' },
+  { name: 'Acuña, Amiel Josiah C.', role: 'Researcher', tag: 'AC', photo: '/Amiel_Acuna.png' },
+  { name: 'Austria, Marcus Ceasar Q.', role: 'Researcher', tag: 'MA', photo: '/Marcus_Austria.png' },
+  { name: 'Barrios, Ric Ian I.', role: 'Researcher', tag: 'RB', photo: '/Ric_barrios.png' },
+  { name: 'Tolentino, Jhezra A.', role: 'Researcher', tag: 'JT', photo: '/Jhezra_Tolentino.png' },
 ];
 
 export default function Team() {
@@ -61,13 +61,13 @@ export default function Team() {
               style={{ transitionDelay: `${i * 60}ms` }}
             >
               <div className="relative aspect-[4/5] overflow-hidden bg-[#eef0f5]">
+                <div className="absolute inset-0 bg-linear-to-br from-[#16224a] via-[#2c8fd5] to-[#4ea7e0] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute inset-0 grid-paper opacity-0 transition-opacity duration-500 group-hover:opacity-30" />
                 <img
                   src={m.photo}
                   alt={m.name}
                   className="absolute inset-0 h-full w-full object-cover object-top"
                 />
-                <div className="absolute inset-0 bg-gradient-to-br from-[#16224a] via-[#2c8fd5] to-[#4ea7e0] opacity-0 transition-opacity duration-500 group-hover:opacity-60" />
-                <div className="absolute inset-0 grid-paper opacity-0 transition-opacity duration-500 group-hover:opacity-30" />
                 <span className="absolute bottom-4 right-4 font-display text-6xl text-white/0 transition-colors duration-500 group-hover:text-white/40">
                   {m.tag}
                 </span>
