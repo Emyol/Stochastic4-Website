@@ -35,7 +35,7 @@ export default function Hero() {
 
       <div className="container relative pt-40 md:pt-48 pb-24 md:pb-32">
         <div className="flex items-center gap-3 mb-10 text-[#9fb6e0] text-xs uppercase tracking-[0.28em]">
-          <span className="h-px w-8 bg-[#4ea7e0]" />
+          <img src="/team_logo.png" alt="Stochastic·4" className="h-6 w-auto opacity-80" />
           Thesis Project · Stochastic·4 · 2026
         </div>
 

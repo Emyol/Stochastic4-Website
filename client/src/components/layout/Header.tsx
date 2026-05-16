@@ -27,7 +27,6 @@ export default function Header() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
-  const navListRef = useRef<HTMLUListElement>(null);
   const itemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
 
   // Scroll state for nav shrink
@@ -56,18 +55,17 @@ export default function Header() {
 
   // Slide the pill to the active nav item
   useEffect(() => {
-    const list = navListRef.current;
-    if (!activeSection || !list) {
+    if (!activeSection) {
       setPillStyle((p) => ({ ...p, opacity: 0 }));
       return;
     }
     const anchor = itemRefs.current.get(activeSection);
     if (!anchor) return;
-    const listRect = list.getBoundingClientRect();
-    const anchorRect = anchor.getBoundingClientRect();
+    // offsetLeft/offsetWidth are in the unscaled layout space, so they stay
+    // correct even when the nav has a CSS scale transform applied.
     setPillStyle({
-      left: anchorRect.left - listRect.left,
-      width: anchorRect.width,
+      left: anchor.offsetLeft,
+      width: anchor.offsetWidth,
       opacity: 1,
     });
   }, [activeSection, scrolled]);
@@ -100,12 +98,12 @@ export default function Header() {
             href="/"
             className="group flex items-center gap-2 pl-2 pr-3 md:pr-4 py-1.5 text-white"
           >
-            <span
-              className="grid h-7 w-7 place-items-center rounded-full bg-[#2c8fd5] text-[10px] font-bold tracking-tight text-white transition-transform duration-500 group-hover:rotate-[18deg]"
+            <img
+              src="/kitako_logo.png"
+              alt=""
               aria-hidden
-            >
-              K
-            </span>
+              className="h-7 w-7 rounded-full object-cover transition-transform duration-500 group-hover:rotate-18"
+            />
             <span className="font-display text-base md:text-[17px] font-semibold tracking-tight">
               KitaKo
             </span>
@@ -114,7 +112,7 @@ export default function Header() {
           <span className="hidden md:block h-5 w-px bg-white/15 mx-1" />
 
           {/* Desktop nav */}
-          <ul ref={navListRef} className="hidden md:flex items-center relative">
+          <ul className="hidden md:flex items-center relative">
             {/* Sliding active pill */}
             <span
               aria-hidden
