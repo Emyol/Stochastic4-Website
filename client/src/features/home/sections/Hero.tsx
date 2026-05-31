@@ -1,45 +1,82 @@
-import { ArrowUpRight } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 const HERO_TITLE = 'KitaKo';
 
-const STATS: Array<[string, string]> = [
-  ['SigLIP2', 'Vision-language backbone'],
-  ['LoRA', 'Parameter-efficient fine-tune'],
-  ['Taglish', 'Localised query understanding'],
-  ['On-device', 'Private mobile inference'],
-];
-
-const MARQUEE_WORDS = [
-  'image retrieval',
-  'sigmoid pairwise loss',
-  'taglish normalisation',
-  'mobile-first',
-  'privacy by default',
-  'siglip2 + lora',
-  'on-device inference',
-];
-
 export default function Hero() {
+  const heroRef = useRef<HTMLElement>(null);
+
+  // Scroll-driven exit: update --exit CSS custom property on the section
+  useEffect(() => {
+    if (!heroRef.current) return;
+    const hero = heroRef.current;
+    const heroVid = hero.querySelector<HTMLVideoElement>('.hero-bgvid > video');
+    let hasExited = false;
+    let raf = 0;
+
+    function update() {
+      raf = 0;
+      const rect = hero.getBoundingClientRect();
+      const h = hero.offsetHeight || window.innerHeight;
+      const start = h * 0.30;
+      const end = h * 1.00;
+      const scrolled = Math.max(0, -rect.top);
+      const p = Math.max(0, Math.min(1, (scrolled - start) / Math.max(1, end - start)));
+      hero.style.setProperty('--exit', p.toFixed(4));
+
+      if (heroVid) {
+        if (p > 0.6) hasExited = true;
+        if (hasExited && p < 0.05) {
+          hasExited = false;
+          try { heroVid.currentTime = 0; } catch (_) {}
+          const pr = heroVid.play();
+          if (pr && typeof pr.catch === 'function') pr.catch(() => {});
+        }
+      }
+    }
+
+    function schedule() { if (!raf) raf = requestAnimationFrame(update); }
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    update();
+
+    return () => {
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
-    <section className="relative overflow-hidden bg-[#16224a] text-white">
+    <section ref={heroRef} className="hero-exit relative overflow-hidden bg-[#16224a] text-white">
       <div className="grid-paper absolute inset-0 opacity-60" aria-hidden />
       <div
         aria-hidden
-        className="floaty absolute -top-24 -right-16 h-[26rem] w-[26rem] rounded-full bg-[#2c8fd5]/30 blur-3xl"
+        className="floaty absolute -top-24 -right-16 h-[26rem] w-[26rem] rounded-full bg-[#2c8fd5]/35 blur-3xl"
+        style={{ animationDuration: '17s' }}
       />
       <div
         aria-hidden
-        className="floaty absolute bottom-0 -left-24 h-[18rem] w-[18rem] rounded-full bg-[#4ea7e0]/20 blur-3xl"
-        style={{ animationDelay: '-3s' }}
+        className="floaty absolute bottom-0 -left-24 h-[18rem] w-[18rem] rounded-full bg-[#4ea7e0]/25 blur-3xl"
+        style={{ animationDelay: '-7s', animationDuration: '21s' }}
       />
 
-      <div className="container relative pt-40 md:pt-48 pb-24 md:pb-32">
-        <div className="flex items-center gap-3 mb-10 text-[#9fb6e0] text-xs uppercase tracking-[0.28em]">
-          <img src="/team_logo.png" alt="Stochastic·4" className="h-6 w-auto opacity-80" />
+      <div className="hero-inner container relative pt-40 md:pt-44 pb-20 md:pb-28">
+
+        {/* Decorative background video — sits behind title, hidden mobile */}
+        <div className="hero-bgvid" aria-hidden>
+          <video src="/kitako_app_hero.webm" autoPlay muted playsInline preload="auto" />
+        </div>
+
+        {/* Brand row */}
+        <div className="relative z-10 flex items-center gap-3 mb-10 text-[#9fb6e0] text-xs uppercase tracking-[0.28em]">
+          <span className="logo-halo">
+            <img src="/team_logo.png" alt="Stochastic·4" />
+          </span>
           Thesis Project · Stochastic·4 · 2026
         </div>
 
-        <h1 className="font-display font-semibold leading-[0.88] text-[18vw] md:text-[15vw] lg:text-[13rem]">
+        {/* Title */}
+        <h1 className="relative z-10 font-display font-semibold leading-[0.88] text-[16vw] md:text-[12vw] lg:text-[10.5rem]">
           {HERO_TITLE.split('').map((ch, i) => (
             <span key={i} className="mask-reveal">
               <span style={{ ['--delay' as string]: `${120 + i * 70}ms` }}>{ch}</span>
@@ -47,60 +84,53 @@ export default function Hero() {
           ))}
         </h1>
 
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-12 gap-10">
-          <p className="reveal md:col-span-6 md:col-start-1 text-2xl md:text-3xl font-display font-light leading-[1.15] text-white">
-            Bridging linguistic gaps in{' '}
-            <em className="not-italic text-[#4ea7e0]">multimodal visual search.</em>
+        {/* Subtitle */}
+        <div className="relative z-10 mt-12 grid grid-cols-1 md:grid-cols-12 gap-10 items-end">
+          <p className="reveal md:col-span-9 text-2xl md:text-[2rem] font-display font-light leading-[1.12] text-white">
+            Search your gallery in <em className="not-italic text-[#4ea7e0]">Taglish</em>, English, or Filipino
+            {' '}— on your phone, with nothing leaving the device.
           </p>
+        </div>
 
-          <div className="reveal md:col-span-5 md:col-start-8 space-y-6 text-white/70 leading-relaxed">
-            <p>
-              An image-retrieval framework for mobile devices that understands{' '}
-              <span className="text-white">Taglish</span> — the code-switched everyday
-              language of Filipino users. Built on SigLIP2 with LoRA, it runs on-device,
-              preserving privacy and reducing latency.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <a
-                href="#research"
-                className="group inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#16224a] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
-              >
-                Explore the research
-                <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </a>
-              <a
-                href="#team"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white/90 transition-colors hover:border-white/60 hover:text-white"
-              >
-                Meet the team
-              </a>
-            </div>
+        {/* Demo video embed */}
+        <div className="reveal relative z-10 mt-14 md:mt-20">
+          <div className="hero-media" role="img" aria-label="KitaKo demo video">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/ykBH9OFCu3A?rel=0&modestbranding=1"
+              title="KitaKo demo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              loading="lazy"
+            />
           </div>
         </div>
 
-        <div className="reveal mt-24 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 border border-white/10 rounded-2xl overflow-hidden">
-          {STATS.map(([k, v]) => (
-            <div key={k} className="bg-[#16224a] p-6 md:p-8">
-              <p className="font-display text-2xl md:text-3xl text-white">{k}</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">{v}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t border-white/10 py-5 overflow-hidden">
-        <div className="marquee-track text-[#4ea7e0]/80">
-          {Array.from({ length: 2 }).map((_, dup) => (
-            <div key={dup} className="flex shrink-0 items-center">
-              {MARQUEE_WORDS.map((w, i) => (
-                <span key={`${dup}-${i}`} className="flex items-center">
-                  <span className="px-8 font-display text-2xl md:text-3xl tracking-tight">{w}</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#4ea7e0]/60" />
-                </span>
-              ))}
-            </div>
-          ))}
+        {/* CTAs */}
+        <div className="reveal relative z-10 mt-10 flex flex-wrap items-center gap-3">
+          <a
+            href="#walkthrough"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('walkthrough')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="group inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#16224a] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            See the app
+            <svg className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17 17 7"/><path d="M7 7h10v10"/>
+            </svg>
+          </a>
+          <a
+            href="#team"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('team')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white/90 transition-colors hover:border-white/60 hover:text-white"
+          >
+            Meet the team
+          </a>
         </div>
       </div>
     </section>
