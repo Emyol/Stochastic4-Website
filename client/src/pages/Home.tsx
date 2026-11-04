@@ -1,27 +1,45 @@
+import { useCallback, useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import FilmModal from '@/components/site/FilmModal';
 import { useReveal } from '@/hooks/useReveal';
 
-import Hero          from '@/features/home/sections/Hero';
-import Walkthrough   from '@/features/home/sections/Walkthrough';
-import FeaturesStack from '@/features/home/sections/FeaturesStack';
-import Team          from '@/features/home/sections/Team';
-import Resources     from '@/features/home/sections/Resources';
+import Hero from '@/features/home/sections/Hero';
+import Problem from '@/features/home/sections/Problem';
+import Galaxy from '@/features/home/sections/Galaxy';
+import Highlights from '@/features/home/sections/Highlights';
+import Walkthrough from '@/features/home/sections/Walkthrough';
+import HowItWorks from '@/features/home/sections/HowItWorks';
+import Privacy from '@/features/home/sections/Privacy';
+import Research from '@/features/home/sections/Research';
+import Team from '@/features/home/sections/Team';
+import Download from '@/features/home/sections/Download';
 
+/** Page order follows the thesis story: problem → idea → app → how it works → privacy → research → people → get it. */
 export default function Home() {
+  const [film, setFilm] = useState(false);
+  const openFilm = useCallback(() => setFilm(true), []);
+  const closeFilm = useCallback(() => setFilm(false), []);
   useReveal();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <>
+      <a className="skip" href="#highlights">Skip to content</a>
       <Header />
-      <main id="top" className="flex-1">
-        <Hero />
+      <main>
+        <Hero onFilm={openFilm} />
+        <Problem />
+        <Galaxy />
+        <Highlights onFilm={openFilm} />
         <Walkthrough />
-        <FeaturesStack />
+        <HowItWorks />
+        <Privacy />
+        <Research />
         <Team />
-        <Resources />
+        <Download />
       </main>
       <Footer />
-    </div>
+      <FilmModal open={film} onClose={closeFilm} />
+    </>
   );
 }
