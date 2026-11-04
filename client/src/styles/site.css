@@ -226,7 +226,7 @@
 /* Hero constellation: real gallery photos that stream into the phone (transforms set in JS) */
 .constellation { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 .star {
-  --size: calc(54px + var(--z) * 50px);
+  --size: calc(34px + var(--z) * 74px);
   position: absolute; width: var(--size); height: var(--size);
   margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
   will-change: transform, opacity;
@@ -238,7 +238,7 @@
   animation: star-in 1.4s var(--ease-out) both; animation-delay: calc(var(--d) * 90ms + 600ms);
 }
 @keyframes star-in { from { opacity: 0; scale: 0.8; } to { opacity: 1; scale: 1; } }
-@media (max-width: 767px) { .star { --size: calc(34px + var(--z) * 28px); } }
+@media (max-width: 767px) { .star { --size: calc(26px + var(--z) * 40px); } }
 
 /* ===================================================================== Problem statement */
 .problem { padding: 22vh 0 18vh; }
