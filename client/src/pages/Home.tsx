@@ -6,6 +6,7 @@ import { useReveal } from '@/hooks/useReveal';
 
 import Hero from '@/features/home/sections/Hero';
 import Problem from '@/features/home/sections/Problem';
+import Galaxy from '@/features/home/sections/Galaxy';
 import Highlights from '@/features/home/sections/Highlights';
 import Walkthrough from '@/features/home/sections/Walkthrough';
 import HowItWorks from '@/features/home/sections/HowItWorks';
@@ -14,7 +15,7 @@ import Research from '@/features/home/sections/Research';
 import Team from '@/features/home/sections/Team';
 import Download from '@/features/home/sections/Download';
 
-/** Page order follows the thesis story: problem → app → how it works → proof → privacy → people → get it. */
+/** Page order follows the thesis story: problem → idea → app → how it works → privacy → research → people → get it. */
 export default function Home() {
   const [film, setFilm] = useState(false);
   const openFilm = useCallback(() => setFilm(true), []);
@@ -28,6 +29,7 @@ export default function Home() {
       <main>
         <Hero onFilm={openFilm} />
         <Problem />
+        <Galaxy />
         <Highlights onFilm={openFilm} />
         <Walkthrough />
         <HowItWorks />

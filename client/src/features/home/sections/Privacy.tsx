@@ -1,7 +1,10 @@
-const FACTS = [
-  { big: '0', label: 'network calls when KitaKo indexes or searches your photos.' },
-  { big: '100%', label: 'of indexing and inference runs on your phone.' },
-  { big: 'Offline', label: 'No account, no cloud, no upload. Search works without a connection.' },
+import type { ReactNode } from 'react';
+import CountUp from '@/components/site/CountUp';
+
+const FACTS: { key: string; big: ReactNode; label: string }[] = [
+  { key: 'zero', big: '0', label: 'network calls when KitaKo indexes or searches your photos.' },
+  { key: 'all', big: <CountUp to={100} suffix="%" />, label: 'of indexing and inference runs on your phone.' },
+  { key: 'offline', big: 'Offline', label: 'No account, no cloud, no upload. Search works without a connection.' },
 ];
 
 /** Privacy: a dark "cinema" moment with one statement and three plain facts. */
@@ -22,7 +25,7 @@ export default function Privacy() {
         </h2>
         <ul className="facts">
           {FACTS.map((f, i) => (
-            <li key={f.big} data-reveal style={{ ['--d' as string]: i }}>
+            <li key={f.key} data-reveal style={{ ['--d' as string]: i }}>
               <p className="fact-big">{f.big}</p>
               <p className="intro is-dark is-left">{f.label}</p>
             </li>

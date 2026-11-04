@@ -223,6 +223,23 @@
 .cinema-side.is-right { left: calc(50% + min(230px, 19vw)); text-align: left; color: var(--on-ink); }
 @media (max-width: 767px) { .cinema-side { display: none; } }
 
+/* Hero constellation: real gallery photos that stream into the phone (transforms set in JS) */
+.constellation { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.star {
+  --size: calc(54px + var(--z) * 50px);
+  position: absolute; width: var(--size); height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  will-change: transform, opacity;
+}
+.star img {
+  display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 24%;
+  filter: blur(calc((1 - var(--z)) * 2.5px));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 20px 40px -18px rgba(0, 0, 0, 0.85);
+  animation: star-in 1.4s var(--ease-out) both; animation-delay: calc(var(--d) * 90ms + 600ms);
+}
+@keyframes star-in { from { opacity: 0; scale: 0.8; } to { opacity: 1; scale: 1; } }
+@media (max-width: 767px) { .star { --size: calc(34px + var(--z) * 28px); } }
+
 /* ===================================================================== Problem statement */
 .problem { padding: 22vh 0 18vh; }
 .word { color: rgba(245, 245, 247, 0.16); transition: color 350ms ease; }
@@ -231,6 +248,100 @@
 .problem-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; max-width: 1000px; margin: 14vh auto 0; }
 .problem-cols .intro { max-width: none; margin-top: 0; }
 @media (max-width: 767px) { .problem-cols { grid-template-columns: 1fr; gap: 28px; } }
+
+/* ===================================================================== "Every photo has a place" map */
+.galaxy { overflow: hidden; padding-top: clamp(40px, 6vh, 80px); }
+.galaxy > .wrap { display: flex; flex-direction: column; }
+.galaxy-head { text-align: center; }
+.galaxy-head .intro { max-width: 42ch; }
+/* Chips sit under the map visually; the map is aria-hidden, so DOM order (chips first) is what AT reads. */
+.galaxy-chips { order: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; }
+.galaxy-note { order: 3; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 999px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.06); color: var(--on-ink);
+  font: inherit; font-size: 15px; letter-spacing: -0.01em;
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, transform 100ms ease-out;
+}
+.chip:active { transform: scale(0.97); }
+.chip.is-active { background: var(--on-ink); color: var(--ink); border-color: transparent; }
+.chip img { width: 26px; height: 26px; border-radius: 8px; object-fit: cover; }
+.chip-mark {
+  display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px;
+  background: rgba(78, 167, 224, 0.18); color: var(--accent-on-dark); font-size: 17px; font-weight: 700; line-height: 1;
+}
+.chip.is-active .chip-mark { background: rgba(26, 115, 208, 0.12); color: var(--accent-ink); }
+@media (hover: hover) and (pointer: fine) { .chip:not(.is-active):hover { background: rgba(255, 255, 255, 0.12); } }
+.glass-btn.is-dark { background: rgba(255, 255, 255, 0.1); color: var(--on-ink); }
+.glass-btn.is-dark:hover { background: rgba(255, 255, 255, 0.18); }
+
+.galaxy-stage { position: relative; width: 100%; max-width: 1180px; margin: 40px auto 0; }
+.galaxy-lines { position: absolute; inset: 0; z-index: 30; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.galaxy-lines line {
+  stroke: var(--accent-on-dark); stroke-width: 2; stroke-linecap: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 700ms var(--ease-out) forwards;
+}
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.galaxy-item { position: absolute; opacity: 0; will-change: transform, opacity; }
+.galaxy-photo {
+  position: relative; width: 100%; height: 100%;
+  transition: transform 650ms var(--ease-out), opacity 500ms ease;
+  transition-delay: calc(var(--r) * 50ms);
+}
+.galaxy-photo img {
+  display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 24%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 14px 30px -14px rgba(0, 0, 0, 0.85);
+  transition: box-shadow 400ms ease;
+}
+.galaxy-photo.is-match { transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1.3); transition-duration: 800ms; }
+.galaxy-photo.is-match img { box-shadow: 0 0 0 2px var(--accent-on-dark), 0 0 40px rgba(78, 167, 224, 0.55), 0 20px 40px -16px rgba(0, 0, 0, 0.85); }
+.galaxy-photo.is-peer { opacity: 0.45; transform: scale(0.94); }
+.galaxy-photo.is-dim { opacity: 0.28; transform: scale(0.9); }
+.galaxy-rank {
+  position: absolute; top: -7px; left: -7px; display: grid; place-items: center;
+  min-width: 24px; height: 20px; padding: 0 6px; border-radius: 999px;
+  background: var(--cta); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0;
+  animation: rank-in 400ms var(--ease-out) both; animation-delay: calc(300ms + var(--r) * 70ms);
+}
+@keyframes rank-in { from { opacity: 0; scale: 0.6; } to { opacity: 1; scale: 1; } }
+.galaxy-label {
+  position: absolute; z-index: 5; transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.01em; color: rgba(245, 245, 247, 0.4);
+  transition: color 400ms ease;
+}
+.galaxy-stage.has-query .galaxy-label { color: rgba(245, 245, 247, 0.14); }
+.galaxy-stage.has-query .galaxy-label.is-on { color: var(--on-ink); }
+.galaxy-probe { position: absolute; left: 0; top: 0; z-index: 80; pointer-events: none; transition: transform 900ms var(--ease-in-out); }
+.probe-pill {
+  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; translate: -50% -50%;
+  border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 999px; white-space: nowrap;
+  font-size: 15px; font-weight: 600; color: var(--on-ink);
+  background: rgba(5, 7, 13, 0.62);
+  -webkit-backdrop-filter: saturate(180%) blur(16px); backdrop-filter: saturate(180%) blur(16px);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+}
+.probe-pill.is-live {
+  border-color: rgba(78, 167, 224, 0.75);
+  box-shadow: 0 0 0 6px rgba(78, 167, 224, 0.12), 0 0 50px rgba(44, 143, 213, 0.5);
+  animation: probe-pop 500ms var(--ease-out);
+}
+@keyframes probe-pop { from { opacity: 0.4; scale: 0.9; } to { opacity: 1; scale: 1; } }
+.probe-pill img { width: 24px; height: 24px; border-radius: 7px; object-fit: cover; }
+.galaxy-note { max-width: 70ch; margin: 22px auto 0; text-align: center; color: var(--on-ink-2); }
+@media (max-width: 767px) {
+  /* one swipeable row instead of a tall stack */
+  .galaxy-chips {
+    flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none;
+    margin-inline: -22px; padding: 2px 22px; scroll-padding-inline: 22px;
+  }
+  .galaxy-chips::-webkit-scrollbar { display: none; }
+  .chip, .galaxy-chips .glass-btn { flex-shrink: 0; }
+  .chip { height: 40px; font-size: 14px; }
+  .galaxy-lines line { stroke-width: 2.6; }
+  .probe-pill { height: 34px; padding: 0 12px; font-size: 13px; }
+  .galaxy-rank { min-width: 20px; height: 17px; font-size: 10px; }
+}
 
 /* ===================================================================== Highlights gallery */
 .hl { overflow: hidden; }
@@ -268,6 +379,13 @@
 .hl-card.is-night .hl-caption { color: var(--on-ink-2); }
 .hl-card.is-night .hl-caption strong { color: var(--on-ink); }
 .hl-phone { --w: clamp(210px, 24vw, 320px); margin-top: clamp(28px, 5vh, 48px); }
+/* The gallery grows into place as it scrolls in (CSS scroll-driven; static where unsupported). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hl-track { animation: hl-in linear both; animation-timeline: view(); animation-range: entry 0% cover 32%; }
+  }
+}
+@keyframes hl-in { from { opacity: 0.3; scale: 0.9; } to { opacity: 1; scale: 1; } }
 .hl-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 28px; }
 .dots {
   display: flex; align-items: center; height: 56px; padding: 0 16px; border-radius: 999px;
@@ -466,6 +584,10 @@
   .word { color: var(--on-ink); transition: none; }
   .word.is-accent { color: var(--accent-on-dark); }
   .person-photo img, .pill, .glass-btn { transition: none; }
+  .star img, .galaxy-rank, .probe-pill.is-live { animation: none; }
+  .galaxy-photo { transition-duration: 200ms; transition-delay: 0ms; }
+  .galaxy-probe { transition: none; }
+  .galaxy-lines line { animation: none; stroke-dashoffset: 0; }
 }
 @media (prefers-reduced-transparency: reduce) {
   .nav.is-light.is-scrolled, .nav-sheet:not([hidden]) { background: #fff; }

@@ -4,6 +4,7 @@ const COLUMNS = [
   {
     title: 'Explore',
     links: [
+      ['The idea', '#idea'],
       ['Highlights', '#highlights'],
       ['Take the tour', '#tour'],
       ['How it works', '#how-it-works'],

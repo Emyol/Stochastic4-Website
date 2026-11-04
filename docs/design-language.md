@@ -108,6 +108,8 @@ Chosen direction: prototype **A "Cinema" hero** + **C's live search bar** (branc
 - **Interruptible always.** Any programmatic scroll (carousel, gallery) is cancelled the instant the user touches, wheels or drags. Never lock input during a transition.
 - **Video is the motion.** Recordings play only when on screen, only one at a time per gallery, and every auto-playing sequence has a visible pause control.
 - **No idle loops.** No floating blobs, no infinite marquees. The one allowed loop is the blinking text caret in the hero search bar.
+- **The wow moments explain the thesis.** The photos flowing into the phone show indexing. The meaning map shows retrieval. The self-drawing pipeline shows the architecture. A new spectacle has to explain something too, or it doesn't ship.
+- **Native scroll-driven CSS where it's enough** (`animation-timeline: view()` inside `@supports`, e.g. the highlights gallery growing in). JS per-frame writes only when values depend on layout or input.
 
 **Reduced motion** (`prefers-reduced-motion: reduce`)
 - Sticky stages unstick into normal stacked content. Scroll transforms are removed.
@@ -126,6 +128,9 @@ Chosen direction: prototype **A "Cinema" hero** + **C's live search bar** (branc
 | **Statement** | `display-xl`, centered, ≤ 1100px. Words start at 16% opacity color and light to full as they scroll past the reading line; the key word lights in accent. |
 | **Highlights gallery** | Cards are full content width (−36px peek on mobile), 28px radius, `clamp(500px, 72vh, 680px)` tall, with a bold-lead caption on top and a phone below that bleeds off the bottom edge. A glass dot pill turns the active dot into a progress bar, with a separate glass play/pause button. Native scroll-snap. Only the active card and its ±1 neighbors hold a video `src`. |
 | **Big-number tile** | Number in `display` weight 600 in accent (on dark) or `--text`, with a label in `intro` grey beneath. No borders; the surface tone separates tiles. |
+| **Hero constellation** | 14 real gallery photos (WebP, 160px) at the stage edges, size and blur set by depth `z`. Scroll-linked: each glides on an ease-in-out path into the phone's landing point and shrinks to 18% as the phone rises. Mouse-only parallax (±18px × depth). Transforms are written per element, never via a parent variable. |
+| **Meaning map** ("Every photo has a place") | ~55 real photos in hand-placed clusters (two layouts: wide 1000×580, tall 600×1000). They assemble from scattered positions as the section scrolls in. A query chip drops a glass probe; its top 5 fly out of the cluster into a ranked ring (#1 on top, clockwise) with lines drawn from the probe, while other photos dim to 28%. Auto-plays every 4.2s until the visitor picks or pauses. Flower and bus rankings are the app's real results, and the footnote says so. |
+| **Count-up** | Big-number tiles count once on first view (1.4s, ease-out quart). Screen readers get the final value. |
 | **Film modal** | `rgba(0,0,0,.82)` scrim + blur, 16:9 sheet at 18px radius scaling .94 → 1 on open, Esc and backdrop close, focus moves to the close button. The YouTube iframe mounts only while open. |
 
 ## 9. Imagery and media
