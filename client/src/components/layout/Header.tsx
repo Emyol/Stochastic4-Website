@@ -1,169 +1,102 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'wouter';
-import { Menu, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { LINKS } from '@/lib/motion';
 
 const NAV_ITEMS = [
-  { label: 'Walkthrough', id: 'walkthrough' },
-  { label: 'Features',    id: 'features' },
-  { label: 'Team',        id: 'team' },
+  { label: 'Highlights', id: 'highlights' },
+  { label: 'How it works', id: 'how-it-works' },
+  { label: 'Research', id: 'research' },
+  { label: 'Team', id: 'team' },
 ] as const;
 
-const NAV_HEIGHT   = 88;
-const SCROLL_OFFSET = 24;
-
-function scrollToSection(id: string) {
-  const section = document.getElementById(id);
-  if (!section) return;
-  const head = section.querySelector<HTMLElement>('.section-head') ?? section;
-  const top  = head.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT - SCROLL_OFFSET;
-  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-}
-
+/**
+ * Local nav (design-language §8): 52px glass bar. Its tone follows the section underneath
+ * (`data-nav="dark|light"`), and the link for the section in view is underlined.
+ */
 export default function Header() {
-  const [open, setOpen]         = useState(false);
+  const [tone, setTone] = useState<'dark' | 'light'>('dark');
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
-  const itemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const [active, setActive] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    function update() {
-      const y = window.scrollY + NAV_HEIGHT + SCROLL_OFFSET + 8;
+    let raf = 0;
+    const tick = () => {
+      raf = 0;
+      setScrolled(window.scrollY > 8);
+      const probe = 26; // vertical middle of the bar
+      for (const s of Array.from(document.querySelectorAll<HTMLElement>('[data-nav]'))) {
+        const r = s.getBoundingClientRect();
+        if (r.top <= probe && r.bottom > probe) { setTone(s.dataset.nav === 'light' ? 'light' : 'dark'); break; }
+      }
+      const line = window.innerHeight * 0.35;
       let current: string | null = null;
       for (const { id } of NAV_ITEMS) {
         const el = document.getElementById(id);
-        if (el && el.offsetTop <= y) current = id;
+        if (el && el.getBoundingClientRect().top <= line) current = id;
       }
-      setActiveSection(current);
-    }
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    return () => window.removeEventListener('scroll', update);
+      setActive(current);
+    };
+    const schedule = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    tick();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   useEffect(() => {
-    if (!activeSection) { setPillStyle((p) => ({ ...p, opacity: 0 })); return; }
-    const anchor = itemRefs.current.get(activeSection);
-    if (!anchor) return;
-    setPillStyle({ left: anchor.offsetLeft, width: anchor.offsetWidth, opacity: 1 });
-  }, [activeSection, scrolled]);
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const shownTone = open ? 'light' : tone;
 
   return (
-    <>
-      <div
-        className={[
-          'fixed inset-x-0 top-0 z-50 flex justify-center pointer-events-none',
-          'transition-[padding] duration-500 ease-out',
-          scrolled ? 'pt-3 md:pt-4' : 'pt-5 md:pt-7',
-        ].join(' ')}
-      >
-        <nav
-          className={[
-            'pointer-events-auto flex items-center gap-1 md:gap-2',
-            'rounded-full border border-white/10 bg-[#16224a]/85 backdrop-blur-xl',
-            'shadow-[0_10px_40px_-12px_rgba(22,34,74,0.45)]',
-            'transition-all duration-500 ease-out',
-            scrolled ? 'px-2 py-2 md:px-2.5 md:py-2 scale-[0.98]' : 'px-3 py-2.5 md:px-3 md:py-3',
-          ].join(' ')}
-        >
-          <Link href="/" className="group flex items-center gap-2 pl-2 pr-3 md:pr-4 py-1.5 text-white">
-            <img
-              src="/kitako_logo.png"
-              alt=""
-              aria-hidden
-              className="h-7 w-7 rounded-full object-cover transition-transform duration-500 group-hover:rotate-[18deg]"
-            />
-            <span className="font-display text-base md:text-[17px] font-semibold tracking-tight">KitaKo</span>
-          </Link>
+    <header className={`nav is-${shownTone}${scrolled || open ? ' is-scrolled' : ''}${open ? ' is-open' : ''}`}>
+      <div className="nav-bar">
+        <a href="#top" className="nav-brand" onClick={() => setOpen(false)}>
+          <img src="/media/logo-192.webp" alt="" width="24" height="24" />
+          KitaKo
+        </a>
 
-          <span className="hidden md:block h-5 w-px bg-white/15 mx-1" />
-
-          <ul className="hidden md:flex items-center relative">
-            <span
-              aria-hidden
-              className="absolute inset-y-1 rounded-full bg-white/15 pointer-events-none"
-              style={{
-                left: pillStyle.left, width: pillStyle.width, opacity: pillStyle.opacity,
-                transition: 'left 300ms cubic-bezier(0.4,0,0.2,1), width 300ms cubic-bezier(0.4,0,0.2,1), opacity 200ms ease',
-              }}
-            />
-            {NAV_ITEMS.map((item) => (
-              <li key={item.id}>
-                <a
-                  ref={(el) => { if (el) itemRefs.current.set(item.id, el); else itemRefs.current.delete(item.id); }}
-                  href={`#${item.id}`}
-                  onClick={(e) => { e.preventDefault(); scrollToSection(item.id); }}
-                  className={[
-                    'relative inline-flex items-center px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-300',
-                    activeSection === item.id ? 'text-white' : 'text-white/70 hover:text-white',
-                  ].join(' ')}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          <a
-            href="#resources"
-            onClick={(e) => { e.preventDefault(); scrollToSection('resources'); }}
-            className="hidden md:inline-flex items-center gap-1.5 ml-1 rounded-full bg-[#2c8fd5] px-4 py-2 text-[13px] font-semibold text-white shadow-sm transition-all duration-300 hover:bg-white hover:text-[#16224a] hover:shadow-md"
-          >
-            Get the app
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 17 17 7"/><path d="M7 7h10v10"/>
-            </svg>
-          </a>
-
-          <button
-            onClick={() => setOpen((v) => !v)}
-            className="md:hidden ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-            aria-label="Toggle menu"
-            aria-expanded={open}
-          >
-            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+        <nav className="nav-links" aria-label="Sections">
+          {NAV_ITEMS.map((item) => (
+            <a key={item.id} href={`#${item.id}`} aria-current={active === item.id ? 'true' : undefined}>
+              {item.label}
+            </a>
+          ))}
         </nav>
+
+        <a className="pill is-sm nav-cta" href={LINKS.download} target="_blank" rel="noopener noreferrer">Download</a>
+
+        <button
+          type="button"
+          className="nav-toggle"
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+          aria-controls="nav-sheet"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <path d={open ? 'M3 3l10 10M13 3 3 13' : 'M3 6l5 5 5-5'} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
 
-      {/* Mobile menu sheet */}
-      <div
-        className={[
-          'fixed inset-x-0 top-0 z-40 md:hidden transition-all duration-500 ease-out',
-          open ? 'opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-4',
-        ].join(' ')}
-        aria-hidden={!open}
-      >
-        <div className="mx-4 mt-20 rounded-3xl border border-white/10 bg-[#16224a] p-6 shadow-2xl">
-          <ul className="flex flex-col divide-y divide-white/10">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.id}>
-                <a
-                  href={`#${item.id}`}
-                  onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => scrollToSection(item.id), 300); }}
-                  className="flex items-center justify-between py-4 text-white/90"
-                >
-                  <span className="font-display text-2xl">{item.label}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          <a
-            href="#resources"
-            onClick={(e) => { e.preventDefault(); setOpen(false); setTimeout(() => scrollToSection('resources'), 300); }}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#2c8fd5] px-5 py-3 text-sm font-semibold text-white"
-          >
-            Get the app
-          </a>
-        </div>
+      <div id="nav-sheet" className="nav-sheet" hidden={!open}>
+        <ul>
+          {NAV_ITEMS.map((item) => (
+            <li key={item.id}>
+              <a href={`#${item.id}`} onClick={() => setOpen(false)}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
       </div>
-    </>
+    </header>
   );
 }
