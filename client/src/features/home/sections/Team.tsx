@@ -1,9 +1,9 @@
 const MEMBERS = [
-  { name: 'Acuña, Amiel Josiah C.', role: 'Researcher', photo: 'Amiel_Acuna' },
-  { name: 'Austria, Marcus Ceasar Q.', role: 'Researcher', photo: 'Marcus_Austria' },
-  { name: 'Barrios, Ric Ian I.', role: 'Researcher', photo: 'Ric_barrios' },
-  { name: 'Tolentino, Jhezra A.', role: 'Researcher', photo: 'Jhezra_Tolentino' },
-  { name: 'Pura, Justine Jude C., MBA', role: 'Thesis Adviser', photo: 'justine_pura' },
+  { name: 'Amiel Josiah C. Acuña', role: 'Researcher', photo: 'Amiel_Acuna' },
+  { name: 'Marcus Ceasar Q. Austria', role: 'Researcher', photo: 'Marcus_Austria' },
+  { name: 'Ric Ian I. Barrios', role: 'Researcher', photo: 'Ric_barrios' },
+  { name: 'Jhezra A. Tolentino', role: 'Researcher', photo: 'Jhezra_Tolentino' },
+  { name: 'Justine Jude C. Pura, MBA', role: 'Thesis Adviser', photo: 'justine_pura' },
 ];
 
 export default function Team() {
