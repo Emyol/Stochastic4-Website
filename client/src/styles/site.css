@@ -569,6 +569,64 @@
 }
 .modal-close:hover { background: rgba(255, 255, 255, 0.26); }
 
+/* ===================================================================== Load intro ("Focus")
+   Timeline starts when the photos are decoded (.boot leaves .is-wait), and keeps running through
+   .is-exit so a skip mid-way still fades out smoothly. See components/site/IntroFocus.tsx. */
+html.intro-playing { overflow: hidden; }
+html.intro-playing .rise,
+html.intro-playing .star img { animation-play-state: paused; }
+
+.boot {
+  position: fixed; inset: 0; z-index: 300; overflow: hidden;
+  background: var(--ink); color: var(--on-ink);
+  transition: opacity 900ms ease;
+}
+.boot.is-exit { opacity: 0; pointer-events: none; }
+@keyframes boot-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.boot-wall {
+  position: absolute; inset: -4%; padding: 12px;
+  display: grid; gap: 12px; align-content: center;
+  transition: transform 900ms var(--ease-out);
+}
+.boot.is-exit .boot-wall { transform: scale(1.08); }
+.boot-wall img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 18%; }
+.boot-wall.is-blur { opacity: 0; filter: blur(16px) brightness(0.5) saturate(1.1); }
+.boot:not(.is-wait) .boot-wall.is-blur { animation: boot-fade 700ms ease both; }
+.boot-wall.is-sharp { clip-path: circle(0px at 50% 50%); }
+.boot:not(.is-wait) .boot-wall.is-sharp { animation: boot-lens 2000ms 300ms both; }
+@keyframes boot-lens {
+  0%   { clip-path: circle(0px at 50% 50%); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  30%  { clip-path: circle(min(110px, 26vw) at 50% 50%); }
+  55%  { clip-path: circle(min(110px, 26vw) at 50% 50%); animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  100% { clip-path: circle(150vmax at 50% 50%); }
+}
+.boot-lens {
+  position: absolute; left: 50%; top: 50%; width: min(220px, 52vw); aspect-ratio: 1; translate: -50% -50%;
+  border-radius: 50%; opacity: 0;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.75), 0 0 60px rgba(78, 167, 224, 0.55), inset 0 0 30px rgba(255, 255, 255, 0.18);
+}
+.boot:not(.is-wait) .boot-lens { animation: boot-ring 2000ms 300ms both; }
+@keyframes boot-ring {
+  0%   { opacity: 0; scale: 0.2; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  30%  { opacity: 1; scale: 1; }
+  55%  { opacity: 1; scale: 1; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  100% { opacity: 0; scale: 14; }
+}
+.boot-line {
+  position: absolute; left: 50%; top: calc(50% + min(150px, 36vw)); translate: -50% 0;
+  display: grid; text-align: center; white-space: nowrap; opacity: 0;
+  font-size: clamp(28px, 4vw, 44px); font-weight: 600; letter-spacing: -0.02em;
+}
+.boot:not(.is-wait) .boot-line { animation: boot-fade 600ms ease 700ms both; }
+.boot-line > span {
+  grid-area: 1 / 1; justify-self: center; padding: 6px 22px; border-radius: 999px;
+  background: rgba(5, 7, 13, 0.55);
+  -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+  transition: opacity 450ms ease, filter 450ms ease, translate 450ms var(--ease-out);
+}
+.boot-line > span.is-out { opacity: 0; filter: blur(8px); translate: 0 8px; }
+
 /* ===================================================================== User preferences */
 @media (prefers-reduced-motion: reduce) {
   .rise, .search-caret, .nav-sheet:not([hidden]) { animation: none; }
