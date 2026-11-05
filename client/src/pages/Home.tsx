@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FilmModal from '@/components/site/FilmModal';
+import IntroFocus from '@/components/site/IntroFocus';
 import { useReveal } from '@/hooks/useReveal';
 
 import Hero from '@/features/home/sections/Hero';
@@ -40,6 +41,7 @@ export default function Home() {
       </main>
       <Footer />
       <FilmModal open={film} onClose={closeFilm} />
+      <IntroFocus />
     </>
   );
 }
